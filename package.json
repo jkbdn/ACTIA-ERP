@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && next start -p 3000",
+    "start": "prisma migrate deploy && npm run db:seed && next start -p 3000",
     "db:generate": "node node_modules/.bin/prisma generate",
     "db:migrate": "node node_modules/.bin/prisma migrate dev --name init",
     "db:seed": "node node_modules/.bin/ts-node --project tsconfig.seed.json prisma/seed.ts",

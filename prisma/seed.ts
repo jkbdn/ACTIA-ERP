@@ -85,43 +85,43 @@ function computeTaskDates(
 }
 
 async function main() {
-  console.log("🌱 Seeding ACTIA ERP...");
+  console.log("🌱 Seeding ACTIA ERP (modo seguro — no borra datos existentes)...");
 
-  // Clean slate
-  await prisma.activityLog.deleteMany();
-  await prisma.document.deleteMany();
-  await prisma.risk.deleteMany();
-  await prisma.milestone.deleteMany();
-  await prisma.projectTask.deleteMany();
-  await prisma.project.deleteMany();
-  await prisma.taskTemplate.deleteMany();
-  await prisma.user.deleteMany();
+  // ── Usuarios (upsert por email — no toca los existentes) ──────────────────
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@actia.tech" },
+    update: {},
+    create: { name: "Administrador ACTIA", email: "admin@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Administrador" },
+  });
+  const arch = await prisma.user.upsert({
+    where: { email: "arquitectura@actia.tech" },
+    update: {},
+    create: { name: "Ana García", email: "arquitectura@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Arquitectura" },
+  });
+  const ing = await prisma.user.upsert({
+    where: { email: "ingenieria@actia.tech" },
+    update: {},
+    create: { name: "Carlos López", email: "ingenieria@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Ingeniería" },
+  });
+  const prod = await prisma.user.upsert({
+    where: { email: "produccion@actia.tech" },
+    update: {},
+    create: { name: "Marta Ruiz", email: "produccion@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Producción" },
+  });
+  console.log("✅ Usuarios verificados");
 
-  // Users
-  const adminHash = await bcrypt.hash("actia2026", 10);
-  const admin = await prisma.user.create({
-    data: { name: "Administrador ACTIA", email: "admin@actia.tech", passwordHash: adminHash, role: "Administrador" },
-  });
-  const arch = await prisma.user.create({
-    data: { name: "Ana García", email: "arquitectura@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Arquitectura" },
-  });
-  const ing = await prisma.user.create({
-    data: { name: "Carlos López", email: "ingenieria@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Ingeniería" },
-  });
-  const prod = await prisma.user.create({
-    data: { name: "Marta Ruiz", email: "produccion@actia.tech", passwordHash: await bcrypt.hash("actia2026", 10), role: "Producción" },
-  });
-
-  console.log("✅ Users created");
-
-  // Task templates
+  // ── Plantillas de tareas (upsert por code — no toca las existentes) ────────
   for (const t of TASK_TEMPLATES) {
-    await prisma.taskTemplate.create({ data: t });
+    await prisma.taskTemplate.upsert({
+      where: { code: t.code },
+      update: {},
+      create: t,
+    });
   }
-  console.log("✅ Task templates created (47 tasks)");
+  console.log("✅ Plantillas de tareas verificadas (47)");
 
-  // Demo projects
-  const projects = [
+  // ── Proyectos de ejemplo (solo crea si no existen por code) ───────────────
+  const DEMO_PROJECTS = [
     {
       code: "PRY-2026-001",
       name: "Residencia de Lloret de Mar",
@@ -189,15 +189,18 @@ async function main() {
     },
   ];
 
-  const statusMap: Record<string, string[]> = {
-    "En diseño": ["Completada", "En curso", "No iniciada"],
-    "En producción": ["Completada", "Completada", "En curso"],
-  };
+  const templateList = await prisma.taskTemplate.findMany({ orderBy: { sortOrder: "asc" } });
 
-  for (const p of projects) {
+  for (const p of DEMO_PROJECTS) {
+    // Comprueba si ya existe — si existe, lo salta completamente
+    const existing = await prisma.project.findUnique({ where: { code: p.code } });
+    if (existing) {
+      console.log(`⏭️  Proyecto ${p.code} ya existe — omitido`);
+      continue;
+    }
+
     const proj = await prisma.project.create({ data: p });
     const dates = computeTaskDates(TASK_TEMPLATES, p.startDate);
-    const templateList = await prisma.taskTemplate.findMany({ orderBy: { sortOrder: "asc" } });
 
     for (const tmpl of templateList) {
       const d = dates.get(tmpl.code) ?? { startDate: p.startDate, endDate: p.startDate };
@@ -240,7 +243,7 @@ async function main() {
       });
     }
 
-    // Milestones from Hito tasks
+    // Hitos
     const hitoTemplates = TASK_TEMPLATES.filter((t) => t.type === "Hito");
     for (const h of hitoTemplates) {
       const d = dates.get(h.code);
@@ -251,7 +254,7 @@ async function main() {
       }
     }
 
-    // Sample risks
+    // Riesgos de ejemplo
     await prisma.risk.createMany({
       data: [
         { projectId: proj.id, taskCode: "COM-04", description: "Costes no realistas en estimación inicial", severity: "Alta", probability: "Media", mitigation: "Revisión con proveedor de referencia", status: "Activo" },
@@ -260,15 +263,15 @@ async function main() {
       ],
     });
 
-    console.log(`✅ Project ${proj.code} - ${proj.name} created with ${templateList.length} tasks`);
+    console.log(`✅ Proyecto ${proj.code} - ${proj.name} creado`);
   }
 
-  console.log("\n✅ Seed complete!");
-  console.log("  Users:");
-  console.log("    admin@actia.tech     / actia2026  (Administrador)");
-  console.log("    arquitectura@actia.tech / actia2026 (Arquitectura)");
-  console.log("    ingenieria@actia.tech   / actia2026 (Ingeniería)");
-  console.log("    produccion@actia.tech   / actia2026 (Producción)");
+  console.log("\n✅ Seed completado!");
+  console.log("  Usuarios:");
+  console.log("    admin@actia.tech          / actia2026  (Administrador)");
+  console.log("    arquitectura@actia.tech   / actia2026  (Arquitectura)");
+  console.log("    ingenieria@actia.tech     / actia2026  (Ingeniería)");
+  console.log("    produccion@actia.tech     / actia2026  (Producción)");
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());
