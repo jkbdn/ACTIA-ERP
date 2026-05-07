@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start -p 3000",
     "db:generate": "node node_modules/.bin/prisma generate",
     "db:migrate": "node node_modules/.bin/prisma migrate dev --name init",

@@ -32,7 +32,7 @@ function ProjectMenu({ project, onArchive, onDelete, onDuplicate }: {
   onDuplicate: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [dropUp, setDropUp] = useState(false);
+  const [pos, setPos] = useState({ top: 0, right: 0, dropUp: false });
   const btnRef = useRef<HTMLButtonElement>(null);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -47,11 +47,16 @@ function ProjectMenu({ project, onArchive, onDelete, onDuplicate }: {
   function handleOpen(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (!open && btnRef.current) {
+    if (btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
-      setDropUp(rect.bottom + 160 > window.innerHeight);
+      const dropUp = rect.bottom + 160 > window.innerHeight;
+      setPos({
+        top: dropUp ? rect.top - 132 : rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+        dropUp,
+      });
     }
-    setOpen(!open);
+    setOpen((v) => !v);
   }
 
   return (
@@ -67,13 +72,9 @@ function ProjectMenu({ project, onArchive, onDelete, onDuplicate }: {
         </svg>
       </button>
       {open && (
-        <div className={`fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl w-44 py-1 text-sm`}
-          style={{
-            top: btnRef.current ? (dropUp
-              ? btnRef.current.getBoundingClientRect().top - 132
-              : btnRef.current.getBoundingClientRect().bottom + 4) : 0,
-            right: window.innerWidth - (btnRef.current?.getBoundingClientRect().right ?? 0),
-          }}
+        <div
+          className="fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl w-44 py-1 text-sm"
+          style={{ top: pos.top, right: pos.right }}
         >
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(false); onDuplicate(); }}
