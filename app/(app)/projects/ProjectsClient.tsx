@@ -32,6 +32,8 @@ function ProjectMenu({ project, onArchive, onDelete, onDuplicate }: {
   onDuplicate: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,10 +44,21 @@ function ProjectMenu({ project, onArchive, onDelete, onDuplicate }: {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  function handleOpen(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setDropUp(rect.bottom + 160 > window.innerHeight);
+    }
+    setOpen(!open);
+  }
+
   return (
     <div ref={ref} className="relative" onClick={(e) => e.preventDefault()}>
       <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(!open); }}
+        ref={btnRef}
+        onClick={handleOpen}
         className="p-1.5 rounded-md hover:bg-gray-100 text-[#5F6368] hover:text-[#1F1F1F] transition-colors"
         title="Opciones"
       >
@@ -54,7 +67,14 @@ function ProjectMenu({ project, onArchive, onDelete, onDuplicate }: {
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-xl w-44 py-1 text-sm">
+        <div className={`fixed z-[9999] bg-white border border-gray-200 rounded-xl shadow-xl w-44 py-1 text-sm`}
+          style={{
+            top: btnRef.current ? (dropUp
+              ? btnRef.current.getBoundingClientRect().top - 132
+              : btnRef.current.getBoundingClientRect().bottom + 4) : 0,
+            right: window.innerWidth - (btnRef.current?.getBoundingClientRect().right ?? 0),
+          }}
+        >
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(false); onDuplicate(); }}
             className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-[#1F1F1F] flex items-center gap-2.5"
@@ -316,7 +336,7 @@ export function ProjectsClient({ projects: initialProjects }: { projects: Projec
 
       {/* Table view */}
       {view === "table" && filtered.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-visible">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
