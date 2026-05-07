@@ -1,0 +1,48 @@
+{
+  "name": "actia-erp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:generate": "node node_modules/.bin/prisma generate",
+    "db:migrate": "node node_modules/.bin/prisma migrate dev --name init",
+    "db:seed": "node node_modules/.bin/ts-node --project tsconfig.seed.json prisma/seed.ts",
+    "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
+    "db:studio": "node node_modules/.bin/prisma studio",
+    "db:reset": "node node_modules/.bin/prisma migrate reset --force && npm run db:seed"
+  },
+  "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/list": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@hookform/resolvers": "^5.0.1",
+    "@prisma/client": "^6.8.2",
+    "bcryptjs": "^3.0.2",
+    "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
+    "next": "16.2.4",
+    "next-auth": "^4.24.11",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.56.3",
+    "recharts": "^2.15.3",
+    "xlsx": "^0.18.5",
+    "zod": "^3.24.4",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "prisma": "^6.8.2",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  }
+}

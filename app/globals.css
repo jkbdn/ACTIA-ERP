@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --actia-yellow: #F5C400;
+  --actia-dark: #1F1F1F;
+  --actia-bg: #F5F5F2;
+  --actia-gray: #5F6368;
+  --actia-red: #D72638;
+  --font-sans: var(--font-roboto), "Roboto", sans-serif;
+}
+
+@theme inline {
+  --color-actia-yellow: var(--actia-yellow);
+  --color-actia-dark: var(--actia-dark);
+  --color-actia-bg: var(--actia-bg);
+  --color-actia-gray: var(--actia-gray);
+  --color-actia-red: var(--actia-red);
+  --font-sans: var(--font-roboto), "Roboto", sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--actia-bg);
+  color: var(--actia-dark);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+/* Gantt */
+.gantt-bar { height: 20px; border-radius: 3px; position: absolute; top: 50%; transform: translateY(-50%); min-width: 4px; }
+.gantt-milestone { width: 12px; height: 12px; transform: rotate(45deg) translateY(-50%); position: absolute; top: 50%; background: #F5C400; border: 2px solid #1F1F1F; }
+
+/* Table */
+.table-cell-edit:focus { outline: 2px solid #F5C400; outline-offset: -2px; background: #fffde7; }
+
+/* Status badges */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+

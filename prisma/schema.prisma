@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("Equipo")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projects     Project[]    @relation("ProjectResponsible")
+  tasks        ProjectTask[] @relation("TaskResponsible")
+  activityLogs ActivityLog[]
+}
+
+model Project {
+  id                  String   @id @default(cuid())
+  code                String   @unique
+  name                String
+  client              String
+  location            String   @default("")
+  systemType          String   @default("Entramado ligero")
+  startDate           DateTime
+  targetDate          DateTime
+  status              String   @default("En diseño")
+  priority            String   @default("Media")
+  mainResponsibleId   String?
+  estimatedBudget     Float?
+  notes               String   @default("")
+  archived            Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  mainResponsible     User?   @relation("ProjectResponsible", fields: [mainResponsibleId], references: [id])
+  tasks               ProjectTask[]
+  milestones          Milestone[]
+  risks               Risk[]
+  documents           Document[]
+  activityLogs        ActivityLog[]
+}
+
+model TaskTemplate {
+  id                   String  @id @default(cuid())
+  code                 String  @unique
+  macroPhase           String
+  phase                String
+  package              String
+  name                 String
+  defaultResponsibleRole String @default("")
+  collaborators        String  @default("")
+  predecessorCode      String  @default("")
+  type                 String  @default("Secuencial")
+  defaultDurationDays  Int     @default(1)
+  deliverable          String  @default("")
+  acceptanceCriteria   String  @default("")
+  defaultRisk          String  @default("")
+  defaultPriority      String  @default("Media")
+  sortOrder            Int     @default(0)
+
+  projectTasks         ProjectTask[]
+}
+
+model ProjectTask {
+  id                  String   @id @default(cuid())
+  projectId           String
+  templateId          String?
+  code                String
+  macroPhase          String
+  phase               String
+  package             String
+  name                String
+  responsibleUserId   String?
+  collaborators       String   @default("")
+  predecessorTaskId   String?
+  predecessorCode     String   @default("")
+  type                String   @default("Secuencial")
+  durationDays        Int      @default(1)
+  startDate           DateTime
+  endDate             DateTime
+  deliverable         String   @default("")
+  acceptanceCriteria  String   @default("")
+  risk                String   @default("")
+  status              String   @default("No iniciada")
+  priority            String   @default("Media")
+  notes               String   @default("")
+  progress            Int      @default(0)
+  manuallyLocked      Boolean  @default(false)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  project             Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  template            TaskTemplate? @relation(fields: [templateId], references: [id])
+  responsible         User?        @relation("TaskResponsible", fields: [responsibleUserId], references: [id])
+}
+
+model Milestone {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  date      DateTime
+  type      String   @default("Hito")
+  status    String   @default("Pendiente")
+  createdAt DateTime @default(now())
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Risk {
+  id          String  @id @default(cuid())
+  projectId   String
+  taskCode    String  @default("")
+  description String
+  severity    String  @default("Media")
+  probability String  @default("Media")
+  mitigation  String  @default("")
+  status      String  @default("Activo")
+  createdAt   DateTime @default(now())
+
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  projectId String
+  taskCode  String   @default("")
+  name      String
+  url       String   @default("")
+  type      String   @default("General")
+  status    String   @default("Borrador")
+  createdAt DateTime @default(now())
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id            String   @id @default(cuid())
+  projectId     String?
+  userId        String?
+  action        String
+  entityType    String
+  entityId      String
+  previousValue String   @default("")
+  newValue      String   @default("")
+  createdAt     DateTime @default(now())
+
+  project       Project? @relation(fields: [projectId], references: [id])
+  user          User?    @relation(fields: [userId], references: [id])
+}
