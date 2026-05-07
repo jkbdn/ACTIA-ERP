@@ -41,8 +41,7 @@ export default function NewProjectPage() {
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const proj = await res.json();
-      router.push(`/projects/${proj.id}`);
+      router.push("/projects");
     } catch (err: any) {
       setError(err.message ?? "Error al crear el proyecto.");
       setLoading(false);

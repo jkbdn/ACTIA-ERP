@@ -124,42 +124,68 @@ async function main() {
   const projects = [
     {
       code: "PRY-2026-001",
-      name: "Casa Bosque Navacerrada",
-      client: "Familia Rodríguez",
-      location: "Navacerrada, Madrid",
-      startDate: new Date("2026-06-01"),
-      targetDate: new Date("2026-12-31"),
-      status: "En diseño",
+      name: "Residencia de Lloret de Mar",
+      client: "Família Puigdomènech",
+      location: "Lloret de Mar, Girona",
+      startDate: new Date("2026-01-15"),
+      targetDate: new Date("2026-10-31"),
+      status: "En producción",
       priority: "Alta",
       mainResponsibleId: arch.id,
-      estimatedBudget: 320000,
-      notes: "Vivienda unifamiliar entramado ligero, 180m². Acceso por carretera forestal.",
+      estimatedBudget: 385000,
+      notes: "Vivienda unifamiliar entramado ligero, 210m². Parcela con pendiente y vistas al mar.",
     },
     {
       code: "PRY-2026-002",
-      name: "Centro Bioclimático Segovia",
-      client: "Ayuntamiento de Segovia",
-      location: "Segovia",
-      startDate: new Date("2026-07-15"),
-      targetDate: new Date("2027-03-31"),
-      status: "En producción",
-      priority: "Crítica",
-      mainResponsibleId: admin.id,
-      estimatedBudget: 890000,
-      notes: "Edificio público de uso múltiple, 420m². Certificación Passivhaus.",
+      name: "Residencia de Llinars del Vallès",
+      client: "Familia Torrent",
+      location: "Llinars del Vallès, Barcelona",
+      startDate: new Date("2026-03-01"),
+      targetDate: new Date("2026-12-15"),
+      status: "En diseño",
+      priority: "Media",
+      mainResponsibleId: arch.id,
+      estimatedBudget: 295000,
+      notes: "Vivienda unifamiliar de una planta, 160m². Sistema entramado ligero con cubierta a dos aguas.",
     },
     {
       code: "PRY-2026-003",
-      name: "Bloque Residencial Logroño",
-      client: "Promotora BioHabitat S.L.",
-      location: "Logroño, La Rioja",
-      startDate: new Date("2026-09-01"),
-      targetDate: new Date("2027-06-30"),
+      name: "Edificio Plurifamiliar Palamós II",
+      client: "Promotora Costa Brava Habitatge S.L.",
+      location: "Palamós, Girona",
+      startDate: new Date("2025-10-01"),
+      targetDate: new Date("2026-11-30"),
+      status: "En producción",
+      priority: "Crítica",
+      mainResponsibleId: ing.id,
+      estimatedBudget: 1480000,
+      notes: "10 viviendas en bloque de 4 plantas. Estructura completa en entramado ligero. Certificación energética A.",
+    },
+    {
+      code: "PRY-2026-004",
+      name: "Escola La Mar",
+      client: "Ajuntament de Palamós",
+      location: "Palamós, Girona",
+      startDate: new Date("2026-02-01"),
+      targetDate: new Date("2027-01-31"),
       status: "En diseño",
+      priority: "Alta",
+      mainResponsibleId: admin.id,
+      estimatedBudget: 920000,
+      notes: "Edificio escolar de dos plantas, 680m². Construcción en madera con criterios Passivhaus y uso público.",
+    },
+    {
+      code: "PRY-2026-005",
+      name: "Edificio Palau",
+      client: "Palau Inversions Immobiliàries S.L.",
+      location: "Palau-solità i Plegamans, Barcelona",
+      startDate: new Date("2026-04-15"),
+      targetDate: new Date("2027-03-31"),
+      status: "Iniciación",
       priority: "Media",
       mainResponsibleId: ing.id,
-      estimatedBudget: 1250000,
-      notes: "8 viviendas en bloque, estructura completa en entramado ligero CLT + madera maciza.",
+      estimatedBudget: 760000,
+      notes: "6 viviendas plurifamiliares con estructura de madera. Proyecto en fase de viabilidad técnica.",
     },
   ];
 
@@ -177,12 +203,14 @@ async function main() {
       const d = dates.get(tmpl.code) ?? { startDate: p.startDate, endDate: p.startDate };
       let taskStatus = "No iniciada";
       if (p.status === "En producción") {
-        if (tmpl.sortOrder <= 16) taskStatus = "Completada";
-        else if (tmpl.sortOrder <= 20) taskStatus = "En curso";
+        if (tmpl.sortOrder <= 22) taskStatus = "Completada";
+        else if (tmpl.sortOrder <= 27) taskStatus = "En curso";
       } else if (p.status === "En diseño") {
         if (tmpl.sortOrder <= 5) taskStatus = "Completada";
-        else if (tmpl.sortOrder <= 8) taskStatus = "En curso";
-        else if (tmpl.code === "DIS-02") taskStatus = "Bloqueada";
+        else if (tmpl.sortOrder <= 9) taskStatus = "En curso";
+      } else if (p.status === "Iniciación") {
+        if (tmpl.sortOrder <= 2) taskStatus = "Completada";
+        else if (tmpl.sortOrder <= 4) taskStatus = "En curso";
       }
 
       await prisma.projectTask.create({
