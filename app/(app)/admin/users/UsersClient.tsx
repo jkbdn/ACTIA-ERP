@@ -9,7 +9,7 @@ interface User {
   name: string;
   email: string;
   role: string;
-  createdAt: string;
+  createdAt: Date | string;
 }
 
 function RoleBadge({ role }: { role: string }) {
@@ -164,7 +164,7 @@ export function UsersClient({ users: initialUsers, currentUserId }: {
       }
       const user = await res.json();
       setUsers((prev) => [...prev, user].sort((a, b) => a.name.localeCompare(b.name)));
-    } else if (modal && modal !== "new") {
+    } else if (modal && typeof modal !== "string") {
       const res = await fetch(`/api/users/${modal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -257,7 +257,7 @@ export function UsersClient({ users: initialUsers, currentUserId }: {
                 <td className="px-5 py-3.5 text-[#5F6368]">{u.email}</td>
                 <td className="px-5 py-3.5"><RoleBadge role={u.role} /></td>
                 <td className="px-5 py-3.5 text-[#5F6368] text-xs">
-                  {new Date(u.createdAt).toLocaleDateString("es-ES")}
+                  {new Date(u.createdAt as string).toLocaleDateString("es-ES")}
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-2 justify-end">
