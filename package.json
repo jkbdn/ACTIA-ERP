@@ -2,10 +2,13 @@
   "name": "actia-erp",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000",
     "db:generate": "node node_modules/.bin/prisma generate",
     "db:migrate": "node node_modules/.bin/prisma migrate dev --name init",
     "db:seed": "node node_modules/.bin/ts-node --project tsconfig.seed.json prisma/seed.ts",
