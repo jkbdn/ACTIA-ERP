@@ -1,16 +1,40 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: "⬛" },
-  { href: "/projects", label: "Proyectos", icon: "📁" },
-  { href: "/gantt", label: "Gantt General", icon: "📊" },
-  { href: "/calendar", label: "Calendario", icon: "📅" },
+  { href: "/dashboard",    label: "Dashboard",    icon: "⬛" },
+  { href: "/projects",     label: "Proyectos",    icon: "📁" },
+  { href: "/gantt",        label: "Gantt General", icon: "📊" },
+  { href: "/calendar",     label: "Calendario",   icon: "📅" },
+];
+
+const adminNav = [
+  { href: "/admin/users",  label: "Usuarios",     icon: "👥" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "Administrador";
+
+  function NavLink({ href, label, icon }: { href: string; label: string; icon: string }) {
+    const active = pathname === href || pathname.startsWith(href + "/");
+    return (
+      <Link
+        href={href}
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+          active
+            ? "bg-[#F5C400] text-[#1F1F1F] font-semibold"
+            : "text-[#9aa0a6] hover:text-white hover:bg-white/5"
+        }`}
+      >
+        <span className="text-base leading-none">{icon}</span>
+        <span>{label}</span>
+      </Link>
+    );
+  }
 
   return (
     <aside className="w-56 bg-[#1F1F1F] flex flex-col h-full shrink-0">
@@ -23,25 +47,21 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Nav */}
+      {/* Nav principal */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {nav.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                active
-                  ? "bg-[#F5C400] text-[#1F1F1F] font-semibold"
-                  : "text-[#9aa0a6] hover:text-white hover:bg-white/5"
-              }`}
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+        {nav.map((item) => <NavLink key={item.href} {...item} />)}
+
+        {/* Sección admin */}
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-1 px-3">
+              <span className="text-[#5F6368] text-[10px] uppercase tracking-widest font-medium">
+                Administración
+              </span>
+            </div>
+            {adminNav.map((item) => <NavLink key={item.href} {...item} />)}
+          </>
+        )}
       </nav>
 
       {/* Footer */}
